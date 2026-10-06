@@ -60,5 +60,11 @@ export const findParts = createServerFn({ method: "POST" })
     const ctx = context as unknown as Ctx;
     const { data: rows, error } = await ctx.supabase.rpc("search_parts", { _q: data.q, _lat: data.lat, _lng: data.lng, _radius_km: data.radiusKm });
     if (error) throw new Error(error.message);
-    return (rows ?? []) as any[];
+    const seen = new Set<string>();
+    return ((rows ?? []) as any[]).filter((r) => {
+      const k = `${r.supplier_id}:${r.part_id}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
   });

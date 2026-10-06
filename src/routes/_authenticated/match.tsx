@@ -258,7 +258,7 @@ function Match() {
           {lastSkip && top && (
             <div className="rounded-2xl bg-primary p-4 text-primary-foreground">
               <div className="flex items-start gap-2 text-base font-bold"><UserX className="mt-0.5 h-5 w-5 shrink-0" />
-                {t(lastSkip.why === "declined" ? "match.busy_sentence" : "match.timeout_sentence", { name: lastSkip.name.split(" ")[0] ?? lastSkip.name, km: top.rationale.distance_km })}
+                {t(lastSkip.why === "declined" ? "match.busy_sentence" : "match.timeout_sentence", { name: lastSkip.name, km: top.rationale.distance_km })}
               </div>
             </div>
           )}
@@ -288,7 +288,7 @@ function Match() {
                 {i === 0 && (
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {waiting === null ? (
-                      <button type="button" onClick={request} className="flex h-12 items-center justify-center gap-1.5 rounded-xl bg-primary text-sm font-bold text-primary-foreground"><Crosshair className="h-4 w-4" />{t("match.request", { name: x.name.split(" ")[0] })}</button>
+                      <button type="button" onClick={request} className="flex h-12 items-center justify-center gap-1.5 rounded-xl bg-primary text-sm font-bold text-primary-foreground"><Crosshair className="h-4 w-4 shrink-0" /><span className="truncate">{t("match.request", { name: x.name })}</span></button>
                     ) : (
                       <div className="flex h-12 items-center justify-center gap-1.5 rounded-xl bg-secondary text-sm font-bold text-primary"><Timer className="h-4 w-4" />{t("match.waiting", { s: waiting })}</div>
                     )}
