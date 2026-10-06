@@ -40,7 +40,22 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
             const c = op.data as Draft["capability"];
             d.syncedCapability = { assetClassIds: c.assetClassIds, systemIds: c.systemIds };
           }
-          if (op.type === "upload") d.documents = d.documents.map((x) => (x.id === op.doc.id ? { ...x, state: "uploaded" } : x));
+          if (op.type === "upload") {
+            d.documents = d.documents.map((x) => (x.id === op.doc.id ? { ...x, state: "uploaded" } : x));
+            const docId = op.doc.id;
+            setChecking((c) => [...c, docId]);
+            extractDocument({ data: { documentId: docId } })
+              .then(async (r: any) => {
+                if (r?.status === "rejected") {
+                  await deleteDocument({ data: { documentId: docId } }).catch(() => {});
+                  const cur = draftRef.current;
+                  if (cur) persist({ ...cur, documents: cur.documents.filter((x) => x.id !== docId) });
+                  toast.error(t(r.reason ?? "wizard.err.not_document"), { duration: 10000 });
+                }
+              })
+              .catch(() => {})
+              .finally(() => setChecking((c) => c.filter((x) => x !== docId)));
+          }
           if (op.type === "submit") d.status = "pending_review";
           persist(d);
           setLastError(null);
@@ -135,16 +150,32 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     return null;
   }, [persist, refreshPending, scope, sync]);
 
+  const removeDocument = useCallback(async (docId: string): Promise<string | null> => {
+    const d = draftRef.current!;
+    const doc = d.documents.find((x) => x.id === docId);
+    if (!doc) return null;
+    if (doc.state === "queued") {
+      await outbox.remove(`${d.supplierId}:upload:${docId}`).catch(() => {});
+    } else {
+      try { await deleteDocument({ data: { documentId: docId } }); } catch { return "common.save_failed"; }
+    }
+    const cur = draftRef.current!;
+    persist({ ...cur, status: cur.status === "pending_review" ? "draft" : cur.status, completed: cur.completed.filter((s) => s !== 10), documents: cur.documents.filter((x) => x.id !== docId) });
+    await refreshPending();
+    return null;
+  }, [persist, refreshPending]);
+
   const submit = useCallback(async (): Promise<string[]> => {
     const d = draftRef.current!;
     const errors = validateSubmit(d);
+    if (checking.length) errors.push("wizard.checking_doc");
     if (errors.length) return errors;
     await outbox.add({ id: `${d.supplierId}:submit`, scope, kind: "submit", payload: { type: "submit", supplierId: d.supplierId, basics: basicsOf(d) } satisfies Op });
     persist({ ...d, completed: Array.from(new Set([...d.completed, 10])) });
     await refreshPending();
     sync();
     return [];
-  }, [persist, refreshPending, scope, sync]);
+  }, [persist, refreshPending, scope, sync, checking]);
 
-  return { draft, update, goTo, saveStep, addDocument, submit, sync, pending, syncing, online, lastError };
+  return { draft, update, goTo, saveStep, addDocument, removeDocument, checking, submit, sync, pending, syncing, online, lastError };
 }
