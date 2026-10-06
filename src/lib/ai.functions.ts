@@ -180,7 +180,7 @@ async function loadDossier(db: any, supplierId: string) {
   const [{ data: s }, { data: docs }, { data: caps }, { data: cov }, { data: eq }] = await Promise.all([
     db.from("suppliers").select("*").eq("id", supplierId).maybeSingle(),
     db.from("supplier_documents").select("id, doc_type, storage_path, expires_at, status, extraction_status, extracted_fields, field_confidence, extraction_confidence, ai_extracted, created_at").eq("supplier_id", supplierId).order("created_at"),
-    db.from("supplier_capabilities").select("active, source, asset_classes(name), systems(name), makes(name)").eq("supplier_id", supplierId),
+    db.from("supplier_capabilities").select("id, active, source, confidence, system_id, fault_type_id, asset_classes(name), systems(name), makes(name), fault_types(name)").eq("supplier_id", supplierId),
     db.from("supplier_coverage").select("country_code, radius_km").eq("supplier_id", supplierId),
     db.from("supplier_equipment").select("equipment_type, quantity").eq("supplier_id", supplierId),
   ]);
@@ -226,7 +226,19 @@ export const getSupplierDossier = createServerFn({ method: "POST" })
       return { ...x, url: u?.signedUrl ?? null, file_name: x.storage_path.split("/").pop()?.replace(/^[0-9a-f-]{36}-/, "") ?? "" };
     }));
     const { data: last } = await db.from("audit_events").select("new_value, created_at").eq("entity_type", "suppliers").eq("entity_id", data.supplierId).eq("action", "ai_assessed").order("created_at", { ascending: false }).limit(1).maybeSingle();
+    const ids = [...d.docs.map((x: any) => x.id), ...d.caps.map((c: any) => c.id)];
+    const { data: ov } = ids.length
+      ? await db.from("audit_events").select("entity_type, entity_id, previous_value, new_value, created_at").eq("action", "ai_override").in("entity_id", ids).order("created_at")
+      : { data: [] as any[] };
+    const overrides = (ov ?? []).map((o: any) => {
+      if (o.entity_type === "supplier_documents") {
+        const doc = d.docs.find((x: any) => x.id === o.entity_id);
+        return `${doc?.doc_type ?? "document"} · ${o.new_value?.field}: AI read "${o.previous_value?.ai_value ?? "—"}", person set "${o.new_value?.value ?? "—"}"`;
+      }
+      return `Capability tag ${o.new_value?.decision ?? "changed"} by a person`;
+    });
     return {
+      overrides,
       supplier: d.s, docs, caps: d.caps, coverage: d.cov, equipment: d.eq,
       references: Array.isArray(d.s.supplier_references) ? d.s.supplier_references : [],
       checklist: checklist(d),
