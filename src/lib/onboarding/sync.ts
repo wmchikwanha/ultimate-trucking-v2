@@ -191,7 +191,7 @@ export async function loadFromServer(userId: string): Promise<Draft | null> {
     serverUpdatedAt: s.updated_at,
     status: s.status,
     step,
-    completed: Array.from({ length: s.onboarding_step ?? 0 }, (_, i) => i + 1),
+    completed: Array.from({ length: s.status === "draft" ? Math.min(9, s.onboarding_step ?? 0) : s.onboarding_step ?? 0 }, (_, i) => i + 1),
     identity: { fullName: s.contact_full_name ?? "", idNumber: s.contact_id_number ?? "", phone: s.phone ?? "+267", locale: s.preferred_locale ?? "en" },
     business: { legalName: s.legal_name === "Draft supplier" ? "" : s.legal_name, tradingName: s.trading_name ?? "", registrationNumber: s.registration_number ?? "", countryCode: s.country_code },
     trade: { kind: (s.onboarding_step ?? 0) >= 3 ? s.kind : "" },
