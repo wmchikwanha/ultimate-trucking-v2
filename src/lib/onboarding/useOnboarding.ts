@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { kv, outbox } from "@/lib/offline/idb";
 import { ACCEPTED_FILES, MAX_FILE_BYTES, STEP_KEYS, TOTAL_STEPS, isExpired, newDraft, validateStep, validateSubmit, type Draft, type DocEntry } from "./model";
+import { extractDocument, deleteDocument } from "@/lib/ai.functions";
 import { ConflictError, NetworkError, applyOp, applyUpload, basicsOf, loadFromServer, type Op, type UploadOp } from "./sync";
 
 export function useOnboarding(userId: string, t: (k: string) => string) {
@@ -12,6 +13,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
   const [syncing, setSyncing] = useState(false);
   const [online, setOnline] = useState(true);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [checking, setChecking] = useState<string[]>([]);
   const draftRef = useRef<Draft | null>(null);
   const syncingRef = useRef(false);
 
