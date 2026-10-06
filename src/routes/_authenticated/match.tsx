@@ -79,7 +79,7 @@ function RationaleCard({ r }: { r: any }) {
               <span className="font-semibold">{c.fault ?? c.system}</span>
               <span className="text-muted-foreground">· {c.asset_class}{c.make ? ` · ${c.make}` : ""}</span>
               <span className="rounded-md bg-background px-1.5 py-0.5 font-bold">{t("match.r.proficiency", { n: c.proficiency })}</span>
-              <span className={`rounded-md px-1.5 py-0.5 font-bold ${c.source === "human_confirmed" ? "bg-lime-soft text-accent-foreground" : c.source === "ai_extracted" ? "bg-secondary text-primary" : "bg-background text-muted-foreground"}`}>{t(SOURCE_LABEL[c.source])}</span>
+              <span className={`rounded-md px-1.5 py-0.5 font-bold ${c.source === "human_confirmed" ? "bg-lime-soft text-accent-foreground" : c.source === "ai_extracted" ? "bg-secondary text-primary" : "bg-background text-muted-foreground"}`}>{t(SOURCE_LABEL[c.source] ?? "match.src.self_declared")}</span>
             </li>
           ))}
         </ul>
