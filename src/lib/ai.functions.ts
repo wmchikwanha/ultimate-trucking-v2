@@ -199,7 +199,7 @@ function checklist(d: Awaited<ReturnType<typeof loadDossier>>) {
   const idNo = id?.extracted_fields?.id_number;
   const items = [
     { key: "Documents supplied", ok: d.docs.length > 0 },
-    { key: "All documents passed AI check", ok: d.docs.length > 0 && d.docs.every((x: any) => x.extraction_status !== "rejected" && x.status !== "rejected") },
+    { key: "All documents passed AI check", ok: d.docs.length > 0 && d.docs.every((x: any) => ["extracted", "needs_review", "confirmed"].includes(x.extraction_status) && x.status !== "rejected") },
     { key: "Document details confirmed", ok: d.docs.length > 0 && d.docs.every((x: any) => ["confirmed", "unsupported"].includes(x.extraction_status)) },
     { key: "No expired documents", ok: d.docs.every((x: any) => !x.expires_at || x.expires_at >= today) },
     { key: "Registration number matches certificate", ok: !s.registration_number ? !reg : !!regNo && norm(regNo) === norm(s.registration_number) },
