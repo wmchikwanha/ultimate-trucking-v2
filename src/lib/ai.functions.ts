@@ -136,7 +136,7 @@ export const extractDocument = createServerFn({ method: "POST" })
       extraction_model: AI_MODEL, extraction_confidence: Number(min.toFixed(3)), extraction_status: status,
     };
     if (typeof fields["expiry_date"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fields["expiry_date"]) && fields["expiry_date"] >= new Date().toISOString().slice(0, 10)) {
-      patch["expires_on"] = fields["expiry_date"];
+      patch["expires_at"] = fields["expiry_date"];
     }
     await db.from("supplier_documents").update(patch as never).eq("id", doc.id);
     await audit([{ actor_id: null, actor_role: null, entity_type: "supplier_documents", entity_id: doc.id, action: "ai_extracted",
@@ -441,7 +441,7 @@ export const listAiReview = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const ctx = context as unknown as Ctx;
     const [{ data: docs }, { data: caps }, { data: sup }] = await Promise.all([
-      ctx.supabase.from("supplier_documents").select("id, doc_type, expires_on, extracted_fields, field_confidence, extraction_status, extraction_confidence").eq("supplier_id", data.supplierId).order("created_at"),
+      ctx.supabase.from("supplier_documents").select("id, doc_type, expires_at, extracted_fields, field_confidence, extraction_status, extraction_confidence").eq("supplier_id", data.supplierId).order("created_at"),
       ctx.supabase.from("supplier_capabilities").select("system_id, fault_type_id, confidence, active, systems(name), fault_types(name)").eq("supplier_id", data.supplierId).eq("source", "ai_extracted"),
       ctx.supabase.from("suppliers").select("capability_description").eq("id", data.supplierId).maybeSingle(),
     ]);
