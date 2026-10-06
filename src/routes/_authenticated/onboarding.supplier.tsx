@@ -2,6 +2,9 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, ArrowLeft, Check, CloudOff, Loader2, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { latestDecisionReason } from "@/lib/approvals.functions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { useTaxonomy } from "@/lib/taxonomy";
@@ -42,6 +45,9 @@ function Wizard() {
   const { data: tax, isError } = useTaxonomy();
   const w = useOnboarding(user.id, t);
   const [errors, setErrors] = useState<string[]>([]);
+  const getReason = useServerFn(latestDecisionReason);
+  const sid = w.draft?.supplierId;
+  const reasonQ = useQuery({ queryKey: ["decision-reason", sid], enabled: !!sid && !!w.draft?.serverUpdatedAt, retry: false, queryFn: () => getReason({ data: { supplierId: sid! } }) });
 
   if (!w.draft || !tax) {
     return (
@@ -81,6 +87,11 @@ function Wizard() {
         <p className="mt-2 text-xs text-muted-foreground">{t("wizard.come_back")}</p>
       </div>
 
+      {!underReview && reasonQ.data?.reason && (
+        <div className="mb-4 flex gap-2 rounded-2xl bg-destructive/10 p-4 text-sm font-semibold text-destructive">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{t("wizard.evidence_requested", { reason: reasonQ.data.reason })}
+        </div>
+      )}
       {(underReview || submittedLocally) && (
         <div className="mb-4 rounded-2xl bg-primary p-4 text-sm text-primary-foreground">
           {underReview ? t("wizard.under_review") : t("wizard.submit_queued")}
