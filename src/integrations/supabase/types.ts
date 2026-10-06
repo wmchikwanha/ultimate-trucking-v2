@@ -2381,6 +2381,7 @@ export type Database = {
           email: string | null
           handled_fault_type_ids: string[]
           id: string
+          is_available: boolean
           kind: Database["public"]["Enums"]["supplier_kind"]
           legal_name: string
           notes: string | null
@@ -2415,6 +2416,7 @@ export type Database = {
           email?: string | null
           handled_fault_type_ids?: string[]
           id?: string
+          is_available?: boolean
           kind: Database["public"]["Enums"]["supplier_kind"]
           legal_name: string
           notes?: string | null
@@ -2449,6 +2451,7 @@ export type Database = {
           email?: string | null
           handled_fault_type_ids?: string[]
           id?: string
+          is_available?: boolean
           kind?: Database["public"]["Enums"]["supplier_kind"]
           legal_name?: string
           notes?: string | null
@@ -2699,6 +2702,39 @@ export type Database = {
       is_operator: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       is_supplier_member: { Args: { _supplier_id: string }; Returns: boolean }
+      rank_suppliers: {
+        Args: {
+          _exclude?: string[]
+          _fault_type_id: string
+          _lat: number
+          _lng: number
+          _radius_km?: number
+          _system_id: string
+        }
+        Returns: {
+          rationale: Json
+          score: number
+          supplier_id: string
+        }[]
+      }
+      search_parts: {
+        Args: { _lat: number; _lng: number; _q: string; _radius_km?: number }
+        Returns: {
+          currency_code: string
+          distance_km: number
+          equivalence: string
+          manufacturer: string
+          part_id: string
+          part_name: string
+          part_number: string
+          price_minor: number
+          stock_qty: number
+          supplier_id: string
+          supplier_name: string
+          verification: string
+          via_part: string
+        }[]
+      }
     }
     Enums: {
       app_role:
