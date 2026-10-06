@@ -103,7 +103,7 @@ function Wizard() {
       <h1 className="text-2xl font-bold text-primary">{t(`wizard.step.${STEP_KEYS[step - 1]}`)}</h1>
       <p className="mb-5 mt-1 text-sm text-muted-foreground">{t(step === 2 ? "wizard.business_help" : `wizard.step.${STEP_KEYS[step - 1]}.help`)}</p>
 
-      <StepBody step={step} draft={d} tax={tax} update={w.update} addDocument={w.addDocument} />
+      <StepBody step={step} draft={d} tax={tax} update={w.update} addDocument={w.addDocument} removeDocument={w.removeDocument} checking={w.checking} goTo={(n) => { setErrors([]); w.goTo(n); window.scrollTo({ top: 0 }); }} />
 
       {errors.length > 0 && (
         <ul className="mt-5 space-y-1 rounded-2xl bg-destructive/10 p-4 text-sm font-semibold text-destructive">

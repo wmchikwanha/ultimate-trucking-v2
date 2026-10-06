@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
+import { ReviewPanel } from "@/components/approvals/ReviewPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
@@ -32,6 +33,7 @@ function Approvals() {
   const { user, roles } = useAuth();
   const canDecide = roles.some((r) => r === "admin" || r === "approver" || r === "ops");
   const [tab, setTab] = useState<Status>("pending_review");
+  const [open, setOpen] = useState<string | null>(null);
 
   const q = useQuery({
     queryKey: ["approvals", tab],
@@ -87,6 +89,10 @@ function Approvals() {
                 {summary.map((x) => <span key={x} className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-primary">{x}</span>)}
               </div>
               {brands.length > 0 && <div className="mt-2 text-xs text-muted-foreground">{t("approvals.brands")}: {brands.join(", ")}</div>}
+              <button type="button" onClick={() => setOpen(open === s.id ? null : s.id)} className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-sm font-bold text-primary">
+                {open === s.id ? t("approvals.close") : t("approvals.open")}<ChevronDown className={`h-4 w-4 transition-transform ${open === s.id ? "rotate-180" : ""}`} />
+              </button>
+              {open === s.id && <ReviewPanel supplierId={s.id} />}
               {tab === "pending_review" && canDecide && (
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <button onClick={() => decide(s.id, "rejected")} className="flex items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-sm font-bold text-destructive"><X className="h-4 w-4" />{t("approvals.reject")}</button>

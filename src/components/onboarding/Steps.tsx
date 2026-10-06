@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2, CloudOff, FileText, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CloudOff, FileText, Loader2, Pencil, Trash2, Upload } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { Taxonomy } from "@/lib/taxonomy";
 import { SUPPLIER_KINDS } from "@/lib/taxonomy";
@@ -15,6 +15,9 @@ type Props = {
   tax: Taxonomy;
   update: <K extends keyof Draft>(k: K, v: Draft[K]) => void;
   addDocument: (f: File, type: DocEntry["docType"], exp: string | null) => Promise<string | null>;
+  removeDocument: (id: string) => Promise<string | null>;
+  checking: string[];
+  goTo: (step: number) => void;
 };
 
 export function StepBody({ step, ...p }: Props & { step: number }) {
@@ -244,7 +247,13 @@ function References({ draft, update }: Props) {
   );
 }
 
-function Documents({ draft, tax }: Props) {
+function EditLink({ step, goTo }: { step: number; goTo: (n: number) => void }) {
+  const t = useT();
+  return <button type="button" onClick={() => goTo(step)} className="inline-flex items-center gap-1 text-xs font-bold text-primary underline"><Pencil className="h-3 w-3" />{t("wizard.edit")}</button>;
+}
+
+function Documents(p: Props) {
+  const { draft, tax, goTo } = p;
   const t = useT();
   const b = draft.business;
   const regionsLabel = draft.coverage.regions.map((r) => t(`region.${r}`)).join(", ");
@@ -253,34 +262,25 @@ function Documents({ draft, tax }: Props) {
     <div className="space-y-4">
       <DocExtractionReview supplierId={draft.supplierId} />
       <div className="rounded-2xl border border-border p-4 text-sm">
-        <div className="mb-1 font-bold text-primary">{t("wizard.review_business")}</div>
+        <div className="mb-1 flex items-center justify-between font-bold text-primary">{t("wizard.review_identity")}<EditLink step={1} goTo={goTo} /></div>
+        <div>{draft.identity.fullName} · {draft.identity.phone}</div>
+      </div>
+      <div className="rounded-2xl border border-border p-4 text-sm">
+        <div className="mb-1 flex items-center justify-between font-bold text-primary">{t("wizard.review_business")}<EditLink step={2} goTo={goTo} /></div>
         <div>{b.legalName}{b.tradingName ? ` (${b.tradingName})` : ""}</div>
         <div className="text-muted-foreground">{b.registrationNumber || "—"} · {draft.trade.kind ? t(`supplier_kind.${draft.trade.kind}`) : "—"}</div>
       </div>
       <div className="rounded-2xl border border-border p-4 text-sm">
-        <div className="mb-1 font-bold text-primary">{t("wizard.review_areas")}</div>
+        <div className="mb-1 flex items-center justify-between font-bold text-primary">{t("wizard.review_areas")}<EditLink step={7} goTo={goTo} /></div>
         <div>{countriesLabel} · {draft.coverage.radiusKm} km</div>
         {regionsLabel && <div className="text-muted-foreground">{regionsLabel}</div>}
       </div>
-      <div className="rounded-2xl border border-border p-4 text-sm">
-        <div className="mb-2 font-bold text-primary">{t("wizard.review_docs")}</div>
-        {draft.documents.length === 0 ? <p className="text-muted-foreground">{t("wizard.no_docs")}</p> : (
-          <ul className="space-y-1">
-            {draft.documents.map((d) => (
-              <li key={d.id} className="flex items-center gap-2">
-                <FileText className="h-4 w-4 shrink-0 text-primary" />
-                <span className="flex-1 truncate">{t(`doc.${d.docType}`)} — {d.fileName}</span>
-                {d.expiresAt && <span className={`text-xs ${isExpired(d.expiresAt) ? "font-bold text-destructive" : "text-muted-foreground"}`}>{d.expiresAt}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <DocUploader {...p} types={[...DOC_TYPES]} title={t("wizard.review_docs")} />
     </div>
   );
 }
 
-function DocUploader({ draft, addDocument, types, title }: Props & { types: DocEntry["docType"][]; title: string }) {
+function DocUploader({ draft, addDocument, removeDocument, checking, types, title }: Props & { types: DocEntry["docType"][]; title: string }) {
   const t = useT();
   const [docType, setDocType] = useState<DocEntry["docType"]>(types[0] ?? "trade_certificate");
   const [expires, setExpires] = useState("");
@@ -319,9 +319,14 @@ function DocUploader({ draft, addDocument, types, title }: Props & { types: DocE
                 </div>
               ) : <div className="text-xs text-muted-foreground">{t("wizard.no_expiry")}</div>}
               <div className="mt-1 text-[11px] text-muted-foreground">
-                {d.state === "uploaded" ? <span className="text-primary">{t("wizard.uploaded")}</span> : <span className="inline-flex items-center gap-1"><CloudOff className="h-3 w-3" />{t("wizard.waiting_upload")}</span>}
+                {checking.includes(d.id) ? <span className="inline-flex items-center gap-1 text-primary"><Loader2 className="h-3 w-3 animate-spin" />{t("wizard.checking_doc")}</span>
+                  : d.state === "uploaded" ? <span className="text-primary">{t("wizard.uploaded")}</span> : <span className="inline-flex items-center gap-1"><CloudOff className="h-3 w-3" />{t("wizard.waiting_upload")}</span>}
               </div>
             </div>
+            <button type="button" aria-label={t("wizard.delete_doc")} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-destructive hover:bg-destructive/10"
+              onClick={async () => { if (!window.confirm(t("wizard.delete_confirm"))) return; const e = await removeDocument(d.id); setError(e); }}>
+              <Trash2 className="h-4 w-4" />
+            </button>
           </div>
         );
       })}
