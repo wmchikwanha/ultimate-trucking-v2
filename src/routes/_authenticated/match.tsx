@@ -27,8 +27,22 @@ const TOWNS: { name: string; lat: number; lng: number }[] = [
   { name: "Mahalapye", lat: -23.105, lng: 26.815 },
   { name: "Palapye", lat: -22.547, lng: 27.125 },
   { name: "Francistown", lat: -21.17, lng: 27.51 },
+  { name: "Molepolole", lat: -24.406, lng: 25.495 },
+  { name: "Kanye", lat: -24.98, lng: 25.335 },
+  { name: "Jwaneng", lat: -24.6, lng: 24.73 },
+  { name: "Tsabong", lat: -26.05, lng: 22.4 },
+  { name: "Ghanzi", lat: -21.7, lng: 21.78 },
+  { name: "Selebi-Phikwe", lat: -22.0, lng: 27.83 },
+  { name: "Letlhakane", lat: -21.42, lng: 25.59 },
+  { name: "Tati Siding", lat: -21.4, lng: 27.47 },
+  { name: "Ramokgwebana", lat: -20.62, lng: 27.73 },
+  { name: "Sowa (Sua Pan)", lat: -20.56, lng: 26.22 },
+  { name: "Nata", lat: -20.212, lng: 26.18 },
   { name: "Maun", lat: -19.983, lng: 23.416 },
   { name: "Kasane", lat: -17.816, lng: 25.15 },
+  { name: "Plumtree (ZW)", lat: -20.48, lng: 27.82 },
+  { name: "Beitbridge (ZW)", lat: -22.217, lng: 30.003 },
+  { name: "Johannesburg (ZA)", lat: -26.2, lng: 28.04 },
 ];
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -84,6 +98,12 @@ function RationaleCard({ r }: { r: any }) {
           ))}
         </ul>
       </div>
+      {r.corridor && (
+        <p className="rounded-xl bg-lime-soft p-2 text-xs text-accent-foreground">
+          <span className="font-bold">{t("match.r.corridor", { name: r.corridor.name })}</span>{" "}
+          {t("match.r.corridor_detail", { km: r.corridor.you_km, route: r.corridor.route })}
+        </p>
+      )}
       <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
         <div className="rounded-xl bg-background p-2"><dt className="text-muted-foreground">{t("match.r.rating")}</dt><dd className="font-bold">{r.rating_count ? `${r.rating} ★ · ${t("match.r.jobs_rated", { n: r.rating_count })}` : t("match.r.no_ratings")}</dd><dd className="text-[10px] text-muted-foreground">{t("match.r.fair_rating", { n: r.bayesian_rating })}</dd></div>
         <div className="rounded-xl bg-background p-2"><dt className="text-muted-foreground">{t("match.r.on_time")}</dt><dd className="font-bold">{r.jobs ? `${Math.round((r.on_time / r.jobs) * 100)}%` : "—"}</dd><dd className="text-[10px] text-muted-foreground">{t("match.r.of_jobs", { ok: r.on_time, n: r.jobs })}</dd></div>

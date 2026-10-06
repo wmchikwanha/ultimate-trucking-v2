@@ -147,7 +147,12 @@ export function ReviewPanel({ supplierId, canDecide, canApprove, pending, onDeci
     setBusy(true);
     const r = await decide({ data: { supplierId, action: mode, reason, verified, overridden: d.overrides } }).catch((e: Error) => ({ ok: false, message: e.message }));
     setBusy(false);
-    if (!r.ok) { toast.error((r as any).message ?? t("common.save_failed")); return; }
+    if (!r.ok) {
+      const m = String((r as any).message ?? "");
+      const friendly = /^(Cannot approve|Only a human approver)/.test(m);
+      toast.error(friendly ? m : t("common.save_failed"));
+      return;
+    }
     toast.success(t(mode === "approve" ? "supplier_status.approved" : mode === "reject" ? "supplier_status.rejected" : "approvals.request_evidence"));
     setMode(null); setReason(""); onDecided();
   }
