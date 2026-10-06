@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, CheckCircle2, ExternalLink, FileText, Loader2, Phone, RefreshCw, Sparkles, XCircle } from "lucide-react";
@@ -123,7 +123,7 @@ export function ReviewPanel({ supplierId }: { supplierId: string }) {
                 {fields.length > 0 && (
                   <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
                     {fields.map(([k, v]) => (
-                      <><dt key={`${k}-k`} className="text-muted-foreground">{t(`ai.field.${k}`)}</dt><dd key={`${k}-v`} className="font-semibold">{Array.isArray(v) ? v.join(", ") : (v as string) ?? "—"}</dd></>
+                      <Fragment key={k}><dt className="text-muted-foreground">{t(`ai.field.${k}`)}</dt><dd className="font-semibold">{Array.isArray(v) ? v.join(", ") : (v as string) ?? "—"}</dd></Fragment>
                     ))}
                   </dl>
                 )}
