@@ -54,20 +54,23 @@ export const decideSupplier = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z.object({
       supplierId: z.string().uuid(),
-      action: z.enum(["approve", "reject", "request_evidence"]),
+      action: z.enum(["approve", "reject", "request_evidence", "return_to_pending"]),
       reason: z.string().trim().max(1000).optional().default(""),
       verified: z.array(z.string().max(200)).max(40).default([]),
       overridden: z.array(z.string().max(300)).max(60).default([]),
     }).parse(d))
   .handler(async ({ data, context }) => {
     const ctx = context as unknown as Ctx;
-    const role = await staffRole(ctx, data.action === "approve" ? ["admin", "approver"] : ["admin", "approver", "ops"]);
+    const role = await staffRole(ctx, data.action === "approve" || data.action === "return_to_pending" ? ["admin", "approver"] : ["admin", "approver", "ops"]);
     if (data.action !== "approve" && data.reason.length < 3) return { ok: false, message: "A reason is required" };
-    const status = data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : "draft";
+    const status = data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : data.action === "return_to_pending" ? "pending_review" : "draft";
     const { data: before } = await ctx.supabase.from("suppliers").select("status").eq("id", data.supplierId).maybeSingle();
     if (!before) return { ok: false, message: "Not found" };
+    if (data.action === "return_to_pending" && !["approved", "rejected"].includes((before as any).status)) return { ok: false, message: "Only approved or rejected suppliers can be returned to pending" };
     // Update as the signed-in human so database guards see who acted.
-    const { error } = await ctx.supabase.from("suppliers").update({ status }).eq("id", data.supplierId);
+    const patch: Record<string, unknown> = { status };
+    if (data.action === "return_to_pending") Object.assign(patch, { approved_at: null, approved_by: null, submitted_at: new Date().toISOString() });
+    const { error } = await ctx.supabase.from("suppliers").update(patch).eq("id", data.supplierId);
     if (error) return { ok: false, message: error.message };
     const db = await admin();
     const { data: hist } = await db.from("supplier_status_history").select("id").eq("supplier_id", data.supplierId).eq("to_status", status).order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -75,7 +78,7 @@ export const decideSupplier = createServerFn({ method: "POST" })
     const { data: prof } = await db.from("profiles").select("full_name, email").eq("user_id", ctx.userId).maybeSingle();
     await db.from("audit_events").insert({
       actor_id: ctx.userId, actor_role: role, entity_type: "suppliers", entity_id: data.supplierId,
-      action: data.action === "approve" ? "supplier_approved" : data.action === "reject" ? "supplier_rejected" : "evidence_requested",
+      action: data.action === "approve" ? "supplier_approved" : data.action === "reject" ? "supplier_rejected" : data.action === "return_to_pending" ? "supplier_returned_to_pending" : "evidence_requested",
       previous_value: { status: (before as any).status },
       new_value: { status, reason: data.reason || null, verified: data.verified, overridden: data.overridden, decided_by: (prof as any)?.full_name || (prof as any)?.email || ctx.userId, source: "human" },
     } as never);
