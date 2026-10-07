@@ -78,6 +78,14 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
             toast.error(t("wizard.err.upload_failed"), { duration: 10000 });
             setLastError(null);
             continue;
+          } else if (op.type === "submit") {
+            // A rejected submit must never block later uploads: drop it, return to draft, explain why.
+            await outbox.remove(item.id).catch(() => {});
+            const cur = draftRef.current;
+            if (cur) persist({ ...cur, status: "draft", completed: cur.completed.filter((s) => s !== 10) });
+            toast.error((e as Error).message, { duration: 12000 });
+            setLastError(null);
+            continue;
           } else {
             setLastError((e as Error).message);
           }
@@ -96,6 +104,10 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     let cancelled = false;
     (async () => {
       const local = (await kv.get<Draft>(draftKey).catch(() => undefined)) ?? null;
+      // Self-heal: clear any stale submit left in the queue so uploads can proceed.
+      for (const it of await outbox.list(scope).catch(() => [])) {
+        if (it.kind === "submit") await outbox.remove(it.id).catch(() => {});
+      }
       const queued = await outbox.list(scope).catch(() => []);
       let next = local ?? newDraft();
       if (navigator.onLine && queued.length === 0) {
