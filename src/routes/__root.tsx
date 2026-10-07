@@ -8,8 +8,9 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Toaster } from "sonner";
+import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { I18nProvider, publicConfigQuery } from "@/lib/i18n";
 
@@ -76,11 +77,38 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   );
 }
 
+const FEEDBACK_EMAIL = "wmchikwanha@gmail.com";
+const FEEDBACK_SUBJECT = "UTS feedback";
+const FEEDBACK_FALLBACK_HREF = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(FEEDBACK_SUBJECT)}`;
+
+function buildFeedbackHref(): string {
+  if (typeof window === "undefined") return FEEDBACK_FALLBACK_HREF;
+  const subject = encodeURIComponent(FEEDBACK_SUBJECT);
+  const body = encodeURIComponent(`Page: ${window.location.href}\n\n`);
+  return `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`;
+}
+
 function SiteFooter() {
+  const [feedbackHref, setFeedbackHref] = useState<string>(FEEDBACK_FALLBACK_HREF);
+
+  useEffect(() => {
+    setFeedbackHref(buildFeedbackHref());
+  }, []);
+
   return (
     <footer className="border-t border-border bg-background px-4 py-4 text-center text-xs text-muted-foreground/70">
       <div className="font-semibold text-muted-foreground/80">Productive Asset Intelligence</div>
       <div className="mt-1">(c) 2026. Developed by Walter C for Ultimate Trucking Solutions.</div>
+      <div className="mt-2">
+        <a
+          href={feedbackHref}
+          className="inline-flex items-center gap-1.5 rounded-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label="Submit feedback to the developer via email"
+        >
+          <Mail className="h-3.5 w-3.5" aria-hidden="true" />
+          Submit feedback
+        </a>
+      </div>
     </footer>
   );
 }
