@@ -166,6 +166,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     const d = draftRef.current!;
     const doc: DocEntry = { id: crypto.randomUUID(), docType, fileName: file.name, expiresAt, state: "queued" };
     const op: UploadOp = { type: "upload", supplierId: d.supplierId, doc, basics: basicsOf(d) };
+    await outbox.remove(`${d.supplierId}:submit`).catch(() => {});
     await outbox.add({ id: `${d.supplierId}:upload:${doc.id}`, scope, kind: "upload", payload: op, file });
     persist({ ...d, documents: [...d.documents, doc] });
     await refreshPending();
@@ -182,6 +183,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     } else {
       try { await deleteDocument({ data: { documentId: docId } }); } catch { return "common.save_failed"; }
     }
+    await outbox.remove(`${d.supplierId}:submit`).catch(() => {});
     const cur = draftRef.current!;
     persist({ ...cur, status: cur.status === "pending_review" ? "draft" : cur.status, completed: cur.completed.filter((s) => s !== 10), documents: cur.documents.filter((x) => x.id !== docId) });
     setLastError(null);
