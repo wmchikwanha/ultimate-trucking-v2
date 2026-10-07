@@ -176,7 +176,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     await refreshPending();
     sync();
     return null;
-  }, [persist, refreshPending]);
+  }, [persist, refreshPending, sync]);
 
   const submit = useCallback(async (): Promise<string[]> => {
     const d = draftRef.current!;
