@@ -78,6 +78,14 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
             toast.error(t("wizard.err.upload_failed"), { duration: 10000 });
             setLastError(null);
             continue;
+          } else if (op.type === "submit") {
+            // A rejected submit must never block later uploads: drop it, return to draft, explain why.
+            await outbox.remove(item.id).catch(() => {});
+            const cur = draftRef.current;
+            if (cur) persist({ ...cur, status: "draft", completed: cur.completed.filter((s) => s !== 10) });
+            toast.error((e as Error).message, { duration: 12000 });
+            setLastError(null);
+            continue;
           } else {
             setLastError((e as Error).message);
           }
@@ -96,6 +104,10 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     let cancelled = false;
     (async () => {
       const local = (await kv.get<Draft>(draftKey).catch(() => undefined)) ?? null;
+      // Self-heal: clear any stale submit left in the queue so uploads can proceed.
+      for (const it of await outbox.list(scope).catch(() => [])) {
+        if (it.kind === "submit") await outbox.remove(it.id).catch(() => {});
+      }
       const queued = await outbox.list(scope).catch(() => []);
       let next = local ?? newDraft();
       if (navigator.onLine && queued.length === 0) {
@@ -154,6 +166,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     const d = draftRef.current!;
     const doc: DocEntry = { id: crypto.randomUUID(), docType, fileName: file.name, expiresAt, state: "queued" };
     const op: UploadOp = { type: "upload", supplierId: d.supplierId, doc, basics: basicsOf(d) };
+    await outbox.remove(`${d.supplierId}:submit`).catch(() => {});
     await outbox.add({ id: `${d.supplierId}:upload:${doc.id}`, scope, kind: "upload", payload: op, file });
     persist({ ...d, documents: [...d.documents, doc] });
     await refreshPending();
@@ -170,6 +183,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     } else {
       try { await deleteDocument({ data: { documentId: docId } }); } catch { return "common.save_failed"; }
     }
+    await outbox.remove(`${d.supplierId}:submit`).catch(() => {});
     const cur = draftRef.current!;
     persist({ ...cur, status: cur.status === "pending_review" ? "draft" : cur.status, completed: cur.completed.filter((s) => s !== 10), documents: cur.documents.filter((x) => x.id !== docId) });
     setLastError(null);
