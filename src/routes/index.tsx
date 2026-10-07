@@ -6,10 +6,10 @@ import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "UTS — Roadside assistance for Southern African fleets" },
-      { name: "description", content: "Ultimate Trucking Solutions connects stranded trucks with verified mechanics, recovery and parts across Southern Africa." },
-      { property: "og:title", content: "UTS — Roadside assistance for Southern African fleets" },
-      { property: "og:description", content: "Verified mechanics, recovery and parts across Southern Africa, matched in minutes." },
+      { title: "UTS — Productive Asset Intelligence" },
+      { name: "description", content: "Ultimate Trucking Solutions helps organisations turn fleet and operational data into productive asset intelligence." },
+      { property: "og:title", content: "UTS — Productive Asset Intelligence" },
+      { property: "og:description", content: "Turn fleet and operational data into productive asset intelligence." },
     ],
   }),
   component: Landing,
@@ -31,9 +31,11 @@ function Landing() {
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-8 md:pt-16">
         <h1 className="max-w-3xl text-3xl font-bold leading-tight md:text-5xl">
           <span className="text-accent">{t("brand.name")}</span>{" "}
-          <span className="text-primary">{t("brand.tagline")}</span>
+          <span className="text-primary">Productive Asset Intelligence</span>
         </h1>
-        <p className="mt-4 max-w-xl text-base text-muted-foreground">{t("landing.intro")}</p>
+        <p className="mt-4 max-w-xl text-base text-muted-foreground">
+          Better visibility, sharper decisions and more productive assets for modern transport operations.
+        </p>
         <Link to="/auth" className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 font-bold text-accent-foreground">
           {t("landing.cta")} <ArrowRight className="h-4 w-4" />
         </Link>

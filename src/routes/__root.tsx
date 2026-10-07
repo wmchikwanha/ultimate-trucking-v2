@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "UTS — Ultimate Trucking Solutions" },
-      { name: "description", content: "Roadside assistance and fleet operations platform for Southern Africa." },
+      { name: "description", content: "Productive asset intelligence for modern transport operations." },
       { name: "author", content: "Ultimate Trucking Solutions" },
       { name: "theme-color", content: "#3E418C" },
       { property: "og:type", content: "website" },

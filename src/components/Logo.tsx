@@ -10,7 +10,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="leading-tight">
           <div className="font-display text-sm font-bold text-primary">{t("brand.name")}</div>
-          <div className="text-[11px] text-muted-foreground">{t("brand.short_tagline")}</div>
+          <div className="text-[11px] text-muted-foreground">Productive Asset Intelligence</div>
         </div>
       )}
     </div>

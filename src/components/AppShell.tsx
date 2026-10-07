@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
           <div className="md:hidden"><Logo compact /></div>
-          <div className="hidden text-sm text-muted-foreground md:block">{t("brand.tagline")}</div>
+          <div className="hidden text-sm text-muted-foreground md:block">Productive Asset Intelligence</div>
           <div className="flex items-center gap-3">
             <RoleSwitcher />
             <button onClick={signOut} aria-label={t("shell.sign_out")} className="text-primary md:hidden">
