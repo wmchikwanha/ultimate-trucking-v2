@@ -53,9 +53,6 @@ function Landing() {
           <div><div className="text-xs font-bold uppercase text-accent">{t("contact.address_label")}</div><div className="text-sm">{t("contact.address")}</div></div>
         </div>
       </main>
-      <footer className="mx-auto max-w-5xl px-4 pb-6 text-center text-xs text-muted-foreground/70">
-        (c) 2026. Developed by Walter C for Ultimate Trucking Solutions.
-      </footer>
     </div>
   );
 }

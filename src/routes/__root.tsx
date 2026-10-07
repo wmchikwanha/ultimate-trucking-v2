@@ -76,6 +76,15 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   );
 }
 
+function SiteFooter() {
+  return (
+    <footer className="border-t border-border bg-background px-4 py-4 text-center text-xs text-muted-foreground/70">
+      <div className="font-semibold text-muted-foreground/80">Productive Asset Intelligence</div>
+      <div className="mt-1">(c) 2026. Developed by Walter C for Ultimate Trucking Solutions.</div>
+    </footer>
+  );
+}
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -137,6 +146,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <I18nProvider>
         <Outlet />
+        <SiteFooter />
         <Toaster position="top-center" richColors />
       </I18nProvider>
     </QueryClientProvider>
