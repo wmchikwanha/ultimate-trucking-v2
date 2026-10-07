@@ -87,7 +87,12 @@ function DocCard({ doc, supplierId }: { doc: any; supplierId: string }) {
       {status === "failed" && (
         <button type="button" className="text-xs font-bold text-primary underline" onClick={async () => { await extract({ data: { documentId: doc.id } }); refresh(); }}>{t("ai.retry")}</button>
       )}
-      {status === "rejected" && <p className="flex items-center gap-1 text-xs font-semibold text-destructive"><AlertTriangle className="h-3.5 w-3.5" />{t("wizard.err.not_document")}</p>}
+      {status === "rejected" && (
+        <div className="space-y-1">
+          <p className="flex items-center gap-1 text-xs font-semibold text-destructive"><AlertTriangle className="h-3.5 w-3.5" />{t(doc.ai_extracted?.is_document === false || doc.ai_extracted?.legible_text === false ? "wizard.err.not_document" : "wizard.err.wrong_type")}</p>
+          {doc.ai_extracted?.reason && <p className="text-xs text-muted-foreground">{String(doc.ai_extracted.reason)}</p>}
+        </div>
+      )}
       {["extracted", "needs_review", "confirmed"].includes(status) && (
         <div className="space-y-2">
           {review && <p className="flex items-center gap-1 text-xs font-semibold text-destructive"><AlertTriangle className="h-3.5 w-3.5" />{t("ai.check_low")}</p>}

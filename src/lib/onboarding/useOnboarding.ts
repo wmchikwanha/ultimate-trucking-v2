@@ -52,7 +52,7 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
                   await deleteDocument({ data: { documentId: docId } }).catch(() => {});
                   const cur = draftRef.current;
                   if (cur) persist({ ...cur, documents: cur.documents.filter((x) => x.id !== docId) });
-                  toast.error(t(r.reason ?? "wizard.err.not_document"), { duration: 10000 });
+                  toast.error(`${t(r.reason ?? "wizard.err.not_document")}${r.detail ? ` — ${r.detail}` : ""}`, { duration: 12000 });
                 }
               })
               .catch(() => {})
@@ -70,6 +70,14 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
             toast.info(t("wizard.conflict"));
           } else if (e instanceof NetworkError) {
             setOnline(false);
+          } else if (op.type === "upload") {
+            // A failed upload must never block the queue forever: drop it and let the supplier re-upload.
+            await outbox.remove(item.id).catch(() => {});
+            const cur = draftRef.current;
+            if (cur) persist({ ...cur, documents: cur.documents.filter((x) => x.id !== (op as UploadOp).doc.id) });
+            toast.error(t("wizard.err.upload_failed"), { duration: 10000 });
+            setLastError(null);
+            continue;
           } else {
             setLastError((e as Error).message);
           }
@@ -138,7 +146,8 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     return [];
   }, [persist, refreshPending, scope, sync]);
 
-  const addDocument = useCallback(async (file: File, docType: DocEntry["docType"], expiresAt: string | null): Promise<string | null> => {
+  const addDocument = useCallback(async (file: File, docType: DocEntry["docType"], rawExpiresAt: string | null): Promise<string | null> => {
+    const expiresAt = rawExpiresAt && rawExpiresAt.trim() ? rawExpiresAt : null;
     if (!ACCEPTED_FILES.includes(file.type)) return "wizard.err.file_type";
     if (file.size > MAX_FILE_BYTES) return "wizard.err.file_size";
     if (isExpired(expiresAt)) return "wizard.err.expired";
@@ -163,9 +172,11 @@ export function useOnboarding(userId: string, t: (k: string) => string) {
     }
     const cur = draftRef.current!;
     persist({ ...cur, status: cur.status === "pending_review" ? "draft" : cur.status, completed: cur.completed.filter((s) => s !== 10), documents: cur.documents.filter((x) => x.id !== docId) });
+    setLastError(null);
     await refreshPending();
+    sync();
     return null;
-  }, [persist, refreshPending]);
+  }, [persist, refreshPending, sync]);
 
   const submit = useCallback(async (): Promise<string[]> => {
     const d = draftRef.current!;
