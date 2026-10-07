@@ -273,14 +273,14 @@ export function ReviewPanel({ supplierId, canDecide, canApprove, pending, onDeci
             </>
           ) : (
             <>
-              <h4 className="font-bold text-primary">{t(mode === "reject" ? "approvals.reject" : "approvals.request_evidence")}</h4>
+              <h4 className="font-bold text-primary">{modeLabel(mode)}</h4>
               <textarea autoFocus className={`${inputCls} min-h-20`} placeholder={t("approvals.reason")} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={1000} />
             </>
           )}
           <div className="grid grid-cols-2 gap-2">
             <button type="button" onClick={() => setMode(null)} className="rounded-xl border border-border py-2.5 text-sm font-bold">{t("approvals.close")}</button>
             <button type="button" disabled={busy || (mode !== "approve" && reason.trim().length < 3)} onClick={submit} className="flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-50">
-              {busy && <Loader2 className="h-4 w-4 animate-spin" />}{t(mode === "approve" ? "approvals.approve" : mode === "reject" ? "approvals.reject" : "approvals.request_evidence")}
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}{modeLabel(mode)}
             </button>
           </div>
         </section>
