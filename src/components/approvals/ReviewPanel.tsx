@@ -128,7 +128,8 @@ export function ReviewPanel({ supplierId, canDecide, canApprove, pending, onDeci
   });
   const started = useRef(false);
   useEffect(() => { if (q.data && !q.data.assessment && !started.current) { started.current = true; a.refetch(); } }, [q.data, a]);
-  const [mode, setMode] = useState<null | "approve" | "reject" | "request_evidence">(null);
+  const [mode, setMode] = useState<null | "approve" | "reject" | "request_evidence" | "return_to_pending">(null);
+  const modeLabel = (m: string) => t(m === "approve" ? "approvals.approve" : m === "reject" ? "approvals.reject" : m === "return_to_pending" ? "approvals.return_to_pending" : "approvals.request_evidence");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -153,7 +154,7 @@ export function ReviewPanel({ supplierId, canDecide, canApprove, pending, onDeci
       toast.error(friendly ? m : t("common.save_failed"));
       return;
     }
-    toast.success(t(mode === "approve" ? "supplier_status.approved" : mode === "reject" ? "supplier_status.rejected" : "approvals.request_evidence"));
+    toast.success(mode === "return_to_pending" ? t("supplier_status.pending_review") : t(mode === "approve" ? "supplier_status.approved" : mode === "reject" ? "supplier_status.rejected" : "approvals.request_evidence"));
     setMode(null); setReason(""); onDecided();
   }
 
@@ -248,6 +249,9 @@ export function ReviewPanel({ supplierId, canDecide, canApprove, pending, onDeci
           <button onClick={() => setMode("request_evidence")} className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary py-3 text-sm font-bold text-primary"><FileQuestion className="h-4 w-4" />{t("approvals.request_evidence")}</button>
           <button disabled={!canApprove} onClick={() => setMode("approve")} className="flex items-center justify-center gap-1.5 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"><Check className="h-4 w-4" />{t("approvals.approve")}</button>
         </div>
+      )}
+      {!pending && canApprove && !mode && (
+        <button onClick={() => setMode("return_to_pending")} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-3 text-sm font-bold text-primary"><FileQuestion className="h-4 w-4" />{t("approvals.return_to_pending")}</button>
       )}
 
       {mode && (
