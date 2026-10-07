@@ -93,7 +93,10 @@ export const extractDocument = createServerFn({ method: "POST" })
           `You verify and read a ${def.schema.replace(/_/g, " ")} from Southern Africa submitted by a supplier. ` +
           `First fill _check: is_document = true only if the image/file is an official document or certificate with printed text ` +
           `(photos of animals, people, vehicles, scenery, blank pages or screenshots unrelated to a document are false). ` +
-          `matches_type = true only if it is plausibly a ${def.schema.replace(/_/g, " ")}. legible_text = true only if the text can be read. ` +
+          `matches_type = true if it is plausibly a ${def.schema.replace(/_/g, " ")}. Be generous with naming: for trade certificates accept any trade or technical qualification ` +
+          `(Certificate of Competence, Trade Test Certificate, National Craft Certificate, Journeyman/Artisan certificate, City & Guilds, BQA/BOTA, TEVET, NQF, diploma, apprenticeship). ` +
+          `For IDs accept Omang, national ID cards, passports and driver licences; for registration accept CIPA/company or business registration certificates. ` +
+          `legible_text = true if the main text can be read. ` +
           `credibility 0..1 = how authentic and consistent it looks (stamps, issuer, formatting, no signs of editing). reason = one short sentence. ` +
           `Then fill every field only from what is printed. Dates as YYYY-MM-DD. If a field is not visible, value null (or empty list) and confidence 0. ` +
           `confidence is 0..1: how sure you are the value is exactly right. Never guess.`,
@@ -116,8 +119,8 @@ export const extractDocument = createServerFn({ method: "POST" })
       is_document: !!check.is_document, matches_type: !!check.matches_type, legible_text: !!check.legible_text,
       credibility: Math.max(0, Math.min(1, Number(check.credibility) || 0)), reason: String(check.reason ?? "").slice(0, 300),
     };
-    const readable = Object.values(conf).filter((c) => c >= 0.5).length;
-    const invalid = !assessment.is_document || !assessment.legible_text || readable === 0;
+    const readable = Object.values(conf).filter((c) => c >= 0.3).length;
+    const invalid = !assessment.is_document || (!assessment.legible_text && readable === 0);
     const wrongType = !invalid && !assessment.matches_type;
     if (invalid || wrongType) {
       await db.from("supplier_documents").update({
