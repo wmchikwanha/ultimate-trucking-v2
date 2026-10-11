@@ -4,7 +4,7 @@ import { getPublicConfig } from "./public.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const DEFAULT_LOCALE = "en";
-export const UI_LOCALES = ["en", "tn", "af", "zu"] as const;
+export const UI_LOCALES = ["en", "tn", "af", "zu", "sn"] as const;
 const LS_KEY = "uts_preferred_locale";
 
 export const publicConfigQuery = (locale: string = DEFAULT_LOCALE) =>

@@ -16,7 +16,7 @@
 - Every business table has a generic audit trigger writing append-only audit_events with HMAC'd IPs. Why: compliance trail without raw PII.
 
 ## App shell
-- All UI strings come from the translations table via useT(key); new strings are added as translations data rows (not schema migrations). Why: future multi-language support without code changes.
+- All UI strings come from the translations table via useT(key); every translation row must ship in a migration (idempotent INSERT ... ON CONFLICT (locale,namespace,key) DO UPDATE), never as test-only data. Why: only migrations reach the live database on publish.
 - Module visibility/state is driven by feature_flags through PhaseModule (live component when flag on, planned preview otherwise); nav config lives in src/lib/nav.ts. Why: phases switch on without code changes.
 - Demo role sign-in runs through a server function gated by the demo_login flag. Why: quick testing that can be switched off before go-live.
 - Field-facing forms save drafts to IndexedDB and queue writes in an outbox (src/lib/offline/idb.ts) that syncs when online; server wins on conflict via suppliers.updated_at. Why: suppliers work without signal.
