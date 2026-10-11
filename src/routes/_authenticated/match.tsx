@@ -7,6 +7,7 @@ import { useTaxonomy } from "@/lib/taxonomy";
 import { findParts, findProviders, matchFaultText } from "@/lib/match.functions";
 import { PhaseModule } from "@/components/PhaseModule";
 import { PageHeader, RoleNotice } from "@/components/PageHeader";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const Route = createFileRoute("/_authenticated/match")({
   head: () => ({
@@ -213,6 +214,7 @@ function Match() {
   return (
     <div className="mx-auto max-w-3xl pb-10">
       <PageHeader eyebrow={t("common.live")} title={t("module.match.title")} description={t("module.match.tagline")} />
+      <div className="mb-3 flex justify-end"><LanguageSwitcher /></div>
 
       <form onSubmit={find} className="space-y-4 rounded-3xl border border-border p-4 sm:p-5">
         <div className="grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1">
