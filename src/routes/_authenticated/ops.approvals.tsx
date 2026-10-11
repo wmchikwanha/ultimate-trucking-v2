@@ -9,6 +9,7 @@ import { useT } from "@/lib/i18n";
 import { listQueue } from "@/lib/approvals.functions";
 import { PhaseModule } from "@/components/PhaseModule";
 import { PageHeader, RoleNotice } from "@/components/PageHeader";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const Route = createFileRoute("/_authenticated/ops/approvals")({
   head: () => ({
@@ -61,6 +62,7 @@ function Approvals() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader eyebrow={t("common.live")} title={t("module.approvals.title")} description={t("module.approvals.tagline")} />
+      <div className="mb-3 flex justify-end"><LanguageSwitcher /></div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {TABS.map((s) => (
           <button key={s} onClick={() => { setTab(s); setOpen(null); }} className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${tab === s ? "bg-primary text-primary-foreground" : "bg-secondary text-primary"}`}>

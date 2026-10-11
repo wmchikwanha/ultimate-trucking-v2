@@ -1,0 +1,2 @@
+ALTER TABLE public.translations ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'human' CHECK (source IN ('human','machine'));
+ALTER TABLE public.translations ADD COLUMN IF NOT EXISTS reviewed boolean NOT NULL DEFAULT true;

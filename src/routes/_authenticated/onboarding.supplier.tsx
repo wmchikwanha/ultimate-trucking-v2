@@ -7,6 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { latestDecisionReason } from "@/lib/approvals.functions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTaxonomy } from "@/lib/taxonomy";
 import { STEP_KEYS, TOTAL_STEPS } from "@/lib/onboarding/model";
 import { useOnboarding } from "@/lib/onboarding/useOnboarding";
@@ -111,6 +112,7 @@ function Wizard() {
         })}
       </div>
 
+      <div className="mb-3 flex justify-end"><LanguageSwitcher /></div>
       <h1 className="text-2xl font-bold text-primary">{t(`wizard.step.${STEP_KEYS[step - 1]}`)}</h1>
       <p className="mb-5 mt-1 text-sm text-muted-foreground">{t(step === 2 ? "wizard.business_help" : `wizard.step.${STEP_KEYS[step - 1]}.help`)}</p>
 
