@@ -2585,6 +2585,8 @@ export type Database = {
           key: string
           locale: string
           namespace: string
+          reviewed: boolean
+          source: string
           updated_at: string
           updated_by: string | null
           value: string
@@ -2595,6 +2597,8 @@ export type Database = {
           key: string
           locale: string
           namespace?: string
+          reviewed?: boolean
+          source?: string
           updated_at?: string
           updated_by?: string | null
           value: string
@@ -2605,6 +2609,8 @@ export type Database = {
           key?: string
           locale?: string
           namespace?: string
+          reviewed?: boolean
+          source?: string
           updated_at?: string
           updated_by?: string | null
           value?: string
