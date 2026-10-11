@@ -25,3 +25,7 @@
 ## AI
 - AI extraction/tagging runs in server functions (src/lib/ai.functions.ts) with strict JSON-schema output; AI writes go through the admin client after a caller check, and every AI result and human override is written to audit_events (ai_extracted / ai_tagged / ai_override). Why: bounded output and a who-said-what trail.
 - AI capability rows are inserted with active=false and only count (matching, submit) once a human accepts them; submit is blocked by trigger while document extractions are unconfirmed. Why: never auto-approve.
+
+## Languages
+- Approver screens (approvals.*) and AI text (ai.*) are never translated; other locales fall back to English per key. Why: approvers and AI work in English.
+- Machine translations are stored with source=machine, reviewed=false until a fluent speaker approves them. Why: admin-only review marker.
