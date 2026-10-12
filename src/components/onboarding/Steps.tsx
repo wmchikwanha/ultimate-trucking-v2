@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, CloudOff, FileText, Loader2, Pencil, Trash2, Upload } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
 import type { Taxonomy } from "@/lib/taxonomy";
 import { SUPPLIER_KINDS } from "@/lib/taxonomy";
 import {
