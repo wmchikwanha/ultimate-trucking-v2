@@ -37,19 +37,17 @@ export function StepBody({ step, ...p }: Props & { step: number }) {
 
 function Identity({ draft, update }: Props) {
   const t = useT();
+  const { locale } = useI18n();
   const v = draft.identity;
   const set = (patch: Partial<typeof v>) => update("identity", { ...v, ...patch });
+  // The supplier's language follows the single picker at the top of the page.
+  useEffect(() => { if (v.locale !== locale) update("identity", { ...v, locale }); }, [locale]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="space-y-4">
       <Field label={t("wizard.full_name")}><input className={inputCls} autoComplete="name" value={v.fullName} onChange={(e) => set({ fullName: e.target.value })} maxLength={120} /></Field>
       <Field label={t("wizard.id_number")} hint={t("wizard.id_number_hint")}><input className={inputCls} value={v.idNumber} onChange={(e) => set({ idNumber: e.target.value })} maxLength={30} /></Field>
       <Field label={t("wizard.phone")} hint={t("wizard.phone_hint")}>
         <input className={inputCls} type="tel" inputMode="tel" autoComplete="tel" value={v.phone} onChange={(e) => set({ phone: e.target.value.replace(/[^\d+]/g, "") })} maxLength={16} />
-      </Field>
-      <Field label={t("wizard.language")}>
-        <select className={inputCls} value={v.locale} onChange={(e) => set({ locale: e.target.value })}>
-          {LOCALES.map((l) => <option key={l} value={l}>{t(`lang.${l}`)}</option>)}
-        </select>
       </Field>
     </div>
   );
