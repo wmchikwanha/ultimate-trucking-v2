@@ -4,7 +4,7 @@ UTS (Ultimate Trucking Solutions is based in Botswana and i need you to build th
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://ultimate-trucking.lovable.app
+**Live app**: https://ultimate-trucking-v2.lovable.app
 
 ## Build with Lovable
 
