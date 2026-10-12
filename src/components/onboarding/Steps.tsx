@@ -4,7 +4,7 @@ import { useT } from "@/lib/i18n";
 import type { Taxonomy } from "@/lib/taxonomy";
 import { SUPPLIER_KINDS } from "@/lib/taxonomy";
 import {
-  BUSINESS_KINDS, DOC_TYPES, EQUIPMENT, LOCALES, PAYMENT_PREFS, REGIONS_BY_COUNTRY, expiresSoon, isExpired,
+  BUSINESS_KINDS, DOC_TYPES, EQUIPMENT, PAYMENT_PREFS, REGIONS_BY_COUNTRY, expiresSoon, isExpired,
   type Draft, type DocEntry,
 } from "@/lib/onboarding/model";
 import { AiCapabilityTagger, DocExtractionReview } from "./AiReview";
