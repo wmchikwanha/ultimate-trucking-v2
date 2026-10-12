@@ -628,6 +628,80 @@ export type Database = {
           },
         ]
       }
+      document_types: {
+        Row: {
+          applies_to: string[]
+          category: string
+          code: string
+          country_code: string | null
+          created_at: string
+          explanation_key: string | null
+          extraction_schema: Json
+          fixed_expiry_month_day: string | null
+          id: string
+          issuer: string
+          local_name: string
+          notes: string | null
+          online_check_url: string | null
+          requirement: string
+          retired: boolean
+          updated_at: string
+          validity_months: number | null
+          validity_rule: string
+          verification_status: string
+        }
+        Insert: {
+          applies_to?: string[]
+          category: string
+          code: string
+          country_code?: string | null
+          created_at?: string
+          explanation_key?: string | null
+          extraction_schema?: Json
+          fixed_expiry_month_day?: string | null
+          id?: string
+          issuer: string
+          local_name: string
+          notes?: string | null
+          online_check_url?: string | null
+          requirement?: string
+          retired?: boolean
+          updated_at?: string
+          validity_months?: number | null
+          validity_rule?: string
+          verification_status?: string
+        }
+        Update: {
+          applies_to?: string[]
+          category?: string
+          code?: string
+          country_code?: string | null
+          created_at?: string
+          explanation_key?: string | null
+          extraction_schema?: Json
+          fixed_expiry_month_day?: string | null
+          id?: string
+          issuer?: string
+          local_name?: string
+          notes?: string | null
+          online_check_url?: string | null
+          requirement?: string
+          retired?: boolean
+          updated_at?: string
+          validity_months?: number | null
+          validity_rule?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_types_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["iso2"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           as_at: string
@@ -2574,6 +2648,41 @@ export type Database = {
             columns: ["asset_id"]
             isOneToOne: false
             referencedRelation: "customer_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_document_requirements: {
+        Row: {
+          created_at: string
+          document_type_id: string
+          id: string
+          requirement: string
+          supplier_kind: Database["public"]["Enums"]["supplier_kind"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_type_id: string
+          id?: string
+          requirement: string
+          supplier_kind: Database["public"]["Enums"]["supplier_kind"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_type_id?: string
+          id?: string
+          requirement?: string
+          supplier_kind?: Database["public"]["Enums"]["supplier_kind"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_document_requirements_document_type_id_fkey"
+            columns: ["document_type_id"]
+            isOneToOne: false
+            referencedRelation: "document_types"
             referencedColumns: ["id"]
           },
         ]
