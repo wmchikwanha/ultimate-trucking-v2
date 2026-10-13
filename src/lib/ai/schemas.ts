@@ -12,3 +12,15 @@ export const EXTRACTION_SCHEMAS: Record<string, { schema: string; fields: FieldD
 
 export type ExtractedValue = string | string[] | null;
 export type ExtractedFields = Record<string, ExtractedValue>;
+
+/** Bound a configurable schema before using it in AI output or edit forms. */
+export function extractionDefinition(code: string, raw?: unknown): { schema: string; fields: FieldDef[] } | undefined {
+  if (EXTRACTION_SCHEMAS[code]) return EXTRACTION_SCHEMAS[code];
+  if (!raw || typeof raw !== 'object' || !('fields' in raw) || !Array.isArray(raw.fields)) return undefined;
+  const fields: FieldDef[] = raw.fields.filter((f): f is FieldDef =>
+    !!f && typeof f === 'object' && typeof f.key === 'string' && /^[a-z][a-z0-9_]{0,39}$/.test(f.key)
+  ).slice(0, 20).map(f => ({key:f.key, list: f.list === true}));
+  if (!fields.length) return undefined;
+  const name = 'schema' in raw && typeof raw.schema === 'string' && /^[a-z][a-z0-9_]{0,63}$/.test(raw.schema) ? raw.schema : 'registered_document';
+  return {schema:name, fields};
+}
