@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Loader2, Sparkles, X, AlertTriangle } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { extractDocument, overrideExtraction, tagCapabilities, decideCapabilityTag, listAiReview } from "@/lib/ai.functions";
-import { CONFIDENCE_THRESHOLD, EXTRACTION_SCHEMAS, type ExtractedFields } from "@/lib/ai/schemas";
+import { CONFIDENCE_THRESHOLD, extractionDefinition, type ExtractedFields } from "@/lib/ai/schemas";
 import { inputCls } from "./fields";
 
 function useReview(supplierId: string) {
@@ -31,14 +31,14 @@ export function DocExtractionReview({ supplierId }: { supplierId: string }) {
 
   useEffect(() => {
     for (const d of q.data?.docs ?? []) {
-      if (d.extraction_status === "pending" && !started.current.has(d.id) && EXTRACTION_SCHEMAS[d.doc_type]) {
+      if (d.extraction_status === "pending" && !started.current.has(d.id) && extractionDefinition(d.doc_type, d.document_type?.extraction_schema)) {
         started.current.add(d.id);
         extract({ data: { documentId: d.id } }).finally(() => qc.invalidateQueries({ queryKey: ["ai-review", supplierId] }));
       }
     }
   }, [q.data, extract, qc, supplierId]);
 
-  const docs = (q.data?.docs ?? []).filter((d: any) => EXTRACTION_SCHEMAS[d.doc_type]);
+  const docs = (q.data?.docs ?? []).filter((d: any) => extractionDefinition(d.doc_type, d.document_type?.extraction_schema));
   if (!docs.length) return null;
   return (
     <div className="space-y-3 rounded-2xl border border-primary/30 p-4">
@@ -54,7 +54,7 @@ function DocCard({ doc, supplierId }: { doc: any; supplierId: string }) {
   const qc = useQueryClient();
   const save = useServerFn(overrideExtraction);
   const extract = useServerFn(extractDocument);
-  const def = EXTRACTION_SCHEMAS[doc.doc_type]!;
+  const def = extractionDefinition(doc.doc_type, doc.document_type?.extraction_schema);
   const fields: ExtractedFields = doc.extracted_fields ?? {};
   const conf: Record<string, number> = doc.field_confidence ?? {};
   const [edit, setEdit] = useState<ExtractedFields>({});
@@ -63,7 +63,7 @@ function DocCard({ doc, supplierId }: { doc: any; supplierId: string }) {
   const refresh = () => qc.invalidateQueries({ queryKey: ["ai-review", supplierId] });
   const status: string = doc.extraction_status;
   const review = status === "needs_review";
-  const lowKeys = def.fields.filter((f) => (conf[f.key] ?? 0) < CONFIDENCE_THRESHOLD).map((f) => f.key);
+  const lowKeys = (def?.fields ?? []).filter((f) => (conf[f.key] ?? 0) < CONFIDENCE_THRESHOLD).map((f) => f.key);
 
   async function confirm() {
     setBusy(true); setErr(null);
@@ -80,7 +80,7 @@ function DocCard({ doc, supplierId }: { doc: any; supplierId: string }) {
   return (
     <div className="rounded-xl bg-muted p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="text-sm font-semibold">{t(`doc.${doc.doc_type}`)}</div>
+        <div className="text-sm font-semibold">{doc.document_type?.local_name ?? t(`doc.${doc.doc_type}`)}</div>
         <span className="text-[11px] font-bold text-primary">{t(`ai.status.${status}`)}</span>
       </div>
       {(status === "pending" || status === "processing") && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />{t("ai.reading")}</div>}
@@ -96,7 +96,7 @@ function DocCard({ doc, supplierId }: { doc: any; supplierId: string }) {
       {["extracted", "needs_review", "confirmed"].includes(status) && (
         <div className="space-y-2">
           {review && <p className="flex items-center gap-1 text-xs font-semibold text-destructive"><AlertTriangle className="h-3.5 w-3.5" />{t("ai.check_low")}</p>}
-          {def.fields.map((f) => {
+          {(def?.fields ?? []).map((f) => {
             const editable = status !== "confirmed" && (!review || lowKeys.includes(f.key));
             if (review && !lowKeys.includes(f.key)) return (
               <div key={f.key} className="flex items-center justify-between gap-2 text-xs"><span className="text-muted-foreground">{t(`ai.field.${f.key}`)}</span><span className="truncate font-semibold">{show(fields[f.key])}</span><Conf v={conf[f.key] ?? 0} /></div>

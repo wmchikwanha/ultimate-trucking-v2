@@ -27,7 +27,7 @@ export const E164 = /^\+[1-9]\d{7,14}$/;
 
 export type DocEntry = {
   id: string; // client-generated uuid, reused as supplier_documents.id
-  docType: (typeof DOC_TYPES)[number];
+  docType: string; // Register code, preserving the four legacy codes.
   fileName: string;
   expiresAt: string | null;
   state: "queued" | "uploaded";
