@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, CloudOff, FileText, Loader2, Pencil, Trash2, Upload } from "lucide-react";
+import { useEffect } from "react";
+import { CheckCircle2, Pencil } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import type { Taxonomy } from "@/lib/taxonomy";
 import { SUPPLIER_KINDS } from "@/lib/taxonomy";
 import {
-  BUSINESS_KINDS, DOC_TYPES, EQUIPMENT, PAYMENT_PREFS, REGIONS_BY_COUNTRY, expiresSoon, isExpired,
+  BUSINESS_KINDS, EQUIPMENT, PAYMENT_PREFS, REGIONS_BY_COUNTRY,
   type Draft, type DocEntry,
 } from "@/lib/onboarding/model";
-import { AiCapabilityTagger, DocExtractionReview } from "./AiReview";
+import { AiCapabilityTagger } from "./AiReview";
+import { DocumentChecklist } from "./DocumentChecklist";
 import { Chip, Field, Stepper, inputCls, toggleIn } from "./fields";
 
 type Props = {
@@ -67,8 +68,7 @@ function Business(p: Props) {
           {p.tax.countries.map((c) => <option key={c.iso2} value={c.iso2}>{c.name}</option>)}
         </select>
       </Field>
-      <DocUploader {...p} types={[...DOC_TYPES]} title={t("wizard.all_docs")} />
-      <DocExtractionReview supplierId={p.draft.supplierId} />
+      <DocumentChecklist {...p} />
     </div>
   );
 }
@@ -258,7 +258,7 @@ function Documents(p: Props) {
   const countriesLabel = draft.coverage.countries.map((c) => tax.countries.find((x) => x.iso2 === c)?.name ?? c).join(", ");
   return (
     <div className="space-y-4">
-      <DocExtractionReview supplierId={draft.supplierId} />
+      <DocumentChecklist {...p} />
       <div className="rounded-2xl border border-border p-4 text-sm">
         <div className="mb-1 flex items-center justify-between font-bold text-primary">{t("wizard.review_identity")}<EditLink step={1} goTo={goTo} /></div>
         <div>{draft.identity.fullName} · {draft.identity.phone}</div>
@@ -273,76 +273,6 @@ function Documents(p: Props) {
         <div>{countriesLabel} · {draft.coverage.radiusKm} km</div>
         {regionsLabel && <div className="text-muted-foreground">{regionsLabel}</div>}
       </div>
-      <DocUploader {...p} types={[...DOC_TYPES]} title={t("wizard.review_docs")} />
-    </div>
-  );
-}
-
-function DocUploader({ draft, addDocument, removeDocument, checking, types, title }: Props & { types: DocEntry["docType"][]; title: string }) {
-  const t = useT();
-  const [docType, setDocType] = useState<DocEntry["docType"]>(types[0] ?? "trade_certificate");
-  const [expires, setExpires] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const today = new Date().toISOString().slice(0, 10);
-  const docs = draft.documents.filter((d) => types.includes(d.docType));
-
-  async function add() {
-    if (!file) return;
-    setBusy(true);
-    const err = await addDocument(file, docType, expires || null);
-    setBusy(false);
-    setError(err);
-    if (!err) { setFile(null); setExpires(""); }
-  }
-
-  return (
-    <div className="space-y-3 rounded-2xl border border-border p-4">
-      <div className="text-sm font-bold text-primary">{title}</div>
-      {docs.map((d) => {
-        const expired = isExpired(d.expiresAt);
-        const soon = expiresSoon(d.expiresAt);
-        return (
-          <div key={d.id} className="flex items-center gap-3 rounded-xl bg-muted p-3">
-            <FileText className="h-5 w-5 shrink-0 text-primary" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold">{t(`doc.${d.docType}`)}</div>
-              <div className="truncate text-xs text-muted-foreground">{d.fileName}</div>
-            </div>
-            <div className="text-right">
-              {d.expiresAt ? (
-                <div className={`rounded-lg px-2 py-1 text-xs font-bold ${expired ? "bg-destructive text-destructive-foreground" : soon ? "bg-accent text-accent-foreground" : "bg-background text-primary"}`}>
-                  {t("wizard.expires")} {d.expiresAt}
-                </div>
-              ) : <div className="text-xs text-muted-foreground">{t("wizard.no_expiry")}</div>}
-              <div className="mt-1 text-[11px] text-muted-foreground">
-                {checking.includes(d.id) ? <span className="inline-flex items-center gap-1 text-primary"><Loader2 className="h-3 w-3 animate-spin" />{t("wizard.checking_doc")}</span>
-                  : d.state === "uploaded" ? <span className="text-primary">{t("wizard.uploaded")}</span> : <span className="inline-flex items-center gap-1"><CloudOff className="h-3 w-3" />{t("wizard.waiting_upload")}</span>}
-              </div>
-            </div>
-            <button type="button" aria-label={t("wizard.delete_doc")} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-destructive hover:bg-destructive/10"
-              onClick={async () => { if (!window.confirm(t("wizard.delete_confirm"))) return; const e = await removeDocument(d.id); setError(e); }}>
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        );
-      })}
-      {types.length > 1 && (
-        <select className={inputCls} value={docType} onChange={(e) => setDocType(e.target.value as DocEntry["docType"])}>
-          {types.map((d) => <option key={d} value={d}>{t(`doc.${d}`)}</option>)}
-        </select>
-      )}
-      <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-primary/40 p-4">
-        <Upload className="h-5 w-5 text-primary" />
-        <span className="flex-1 truncate text-sm">{file ? file.name : t("wizard.choose_file")}</span>
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      </label>
-      <Field label={t("wizard.expiry_date")} hint={t("wizard.expiry_hint")}>
-        <input type="date" min={today} className={inputCls} value={expires} onChange={(e) => setExpires(e.target.value)} />
-      </Field>
-      {error && <p className="flex items-center gap-2 text-sm font-semibold text-destructive"><AlertTriangle className="h-4 w-4" />{t(error)}</p>}
-      <button type="button" disabled={!file || busy} onClick={add} className="w-full rounded-xl bg-secondary py-3 text-sm font-bold text-primary disabled:opacity-50">{t("wizard.add_document")}</button>
     </div>
   );
 }

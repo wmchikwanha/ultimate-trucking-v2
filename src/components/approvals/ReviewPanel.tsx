@@ -8,7 +8,7 @@ import {
 import { useT } from "@/lib/i18n";
 import { assessSubmission, getSupplierDossier, overrideExtraction } from "@/lib/ai.functions";
 import { decideSupplier } from "@/lib/approvals.functions";
-import { CONFIDENCE_THRESHOLD, EXTRACTION_SCHEMAS } from "@/lib/ai/schemas";
+import { CONFIDENCE_THRESHOLD, extractionDefinition } from "@/lib/ai/schemas";
 
 const inputCls = "w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs";
 
@@ -54,7 +54,7 @@ function DocViewer({ doc }: { doc: any }) {
 function ExtractionEditor({ doc, onSaved }: { doc: any; onSaved: () => void }) {
   const t = useT();
   const save = useServerFn(overrideExtraction);
-  const def = EXTRACTION_SCHEMAS[doc.doc_type];
+  const def = extractionDefinition(doc.doc_type, doc.document_type?.extraction_schema);
   const [edit, setEdit] = useState<Record<string, any>>({});
   const [busy, setBusy] = useState(false);
   if (!def) return <p className="text-xs text-muted-foreground">—</p>;
@@ -68,7 +68,7 @@ function ExtractionEditor({ doc, onSaved }: { doc: any; onSaved: () => void }) {
   }
   return (
     <div className="space-y-2 rounded-xl bg-muted p-3">
-      <div className="flex items-center justify-between text-sm font-semibold">{t(`doc.${doc.doc_type}`)}<span className="text-[10px] font-bold text-primary">{t(`ai.status.${doc.extraction_status}`)}</span></div>
+      <div className="flex items-center justify-between text-sm font-semibold">{doc.document_type?.local_name ?? t(`doc.${doc.doc_type}`)}<span className="text-[10px] font-bold text-primary">{t(`ai.status.${doc.extraction_status}`)}</span></div>
       {doc.extraction_status === "rejected" && <p className="text-xs font-semibold text-destructive">{doc.ai_extracted?.reason}</p>}
       {def.fields.map((f) => {
         const val = f.key in edit ? edit[f.key] : fields[f.key];
@@ -200,13 +200,15 @@ export function ReviewPanel({ supplierId, canDecide, canApprove, pending, onDeci
               <div className="flex items-start gap-2">
                 <FileText className="h-5 w-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold">{t(`doc.${doc.doc_type}`)}</div>
+                  <div className="text-sm font-semibold">{doc.document_type?.local_name ?? t(`doc.${doc.doc_type}`)}</div>
                   <div className="truncate text-muted-foreground">{doc.file_name}</div>
                   {doc.expires_at && <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 font-bold ${doc.expires_at < today ? "bg-destructive text-destructive-foreground" : "bg-background"}`}>{t("approvals.expires")} {doc.expires_at}</span>}
                 </div>
                 {doc.url && <a href={doc.url} target="_blank" rel="noreferrer" aria-label={t("approvals.view_doc")} className="shrink-0 rounded-lg p-1.5 text-primary hover:bg-background"><ExternalLink className="h-4 w-4" /></a>}
               </div>
-              <DocViewer doc={doc} />
+              {doc.document_type?.notes && <p className="mt-2 text-xs text-muted-foreground">{doc.document_type.notes}</p>}
+               {doc.document_type?.online_check_url && <a href={doc.document_type.online_check_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 font-semibold text-primary"><ExternalLink className="h-3 w-3"/>Verify with issuer</a>}
+               <DocViewer doc={doc} />
             </div>
           ))}
         </section>

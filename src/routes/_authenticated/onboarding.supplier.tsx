@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, ArrowLeft, Check, CloudOff, Loader2, RefreshCw, Send } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CloudOff, Loader2, RefreshCw, Send, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { latestDecisionReason } from "@/lib/approvals.functions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTaxonomy } from "@/lib/taxonomy";
 import { STEP_KEYS, TOTAL_STEPS } from "@/lib/onboarding/model";
@@ -21,6 +22,8 @@ export const Route = createFileRoute("/_authenticated/onboarding/supplier")({
       { name: "description", content: "Register your workshop, mobile mechanic or recovery business with UTS." },
       { property: "og:title", content: "Supplier registration — UTS" },
       { property: "og:description", content: "Join the UTS verified supplier network." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: () => <PhaseModule id="onboarding" visual={{ kind: "pipeline", stages: 4 }} live={Wizard} />,
@@ -48,7 +51,7 @@ function Wizard() {
   const [errors, setErrors] = useState<string[]>([]);
   const getReason = useServerFn(latestDecisionReason);
   const sid = w.draft?.supplierId;
-  const reasonQ = useQuery({ queryKey: ["decision-reason", sid], enabled: !!sid && !!w.draft?.serverUpdatedAt, retry: false, queryFn: () => getReason({ data: { supplierId: sid! } }) });
+  const reasonQ = useQuery({ queryKey: ["decision-reason", sid], enabled: !!sid && !!w.draft?.serverUpdatedAt, retry: false, queryFn: () => sid ? getReason({ data: { supplierId: sid } }) : Promise.resolve({reason:null}) });
 
   if (!w.draft || !tax) {
     return (
@@ -112,7 +115,7 @@ function Wizard() {
         })}
       </div>
 
-      <div className="mb-3 flex justify-end"><LanguageSwitcher /></div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><Button variant="outline" onClick={() => {setErrors([]); w.goTo(10);}}><FileText/>{t("register.documents")} ({d.documents.length})</Button><LanguageSwitcher /></div>
       <h1 className="text-2xl font-bold text-primary">{t(`wizard.step.${STEP_KEYS[step - 1]}`)}</h1>
       <p className="mb-5 mt-1 text-sm text-muted-foreground">{t(step === 2 ? "wizard.business_help" : `wizard.step.${STEP_KEYS[step - 1]}.help`)}</p>
 
