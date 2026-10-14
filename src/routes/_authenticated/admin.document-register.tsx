@@ -69,7 +69,7 @@ function DocumentRegister() {
   </div>)}</div>
   <Dialog open={!!edit} onOpenChange={v=>{if(!v&&!busy)setEdit(null);}}><DialogContent className="max-h-[90dvh] max-w-3xl overflow-auto"><DialogHeader><DialogTitle>{t(edit?.id?'register.edit':'register.new')}</DialogTitle></DialogHeader>
    {edit && <form onSubmit={e=>{e.preventDefault();save();}} className="space-y-4">
-    <Field label="Code"><input required disabled={!!edit.id} className={inputCls} value={edit.code??''} onChange={e=>patch('code',e.target.value)}/></Field>
+    <Field label={t('register.code')}><input required disabled={!!edit.id} className={inputCls} value={edit.code??''} onChange={e=>patch('code',e.target.value)}/></Field>
     <Field label={t('register.name')}><input required className={inputCls} value={edit.local_name??''} onChange={e=>patch('local_name',e.target.value)}/></Field>
     <Field label={t('register.issuer')}><input required className={inputCls} value={edit.issuer??''} onChange={e=>patch('issuer',e.target.value)}/></Field>
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('register.country')}><select className={inputCls} value={edit.country_code??''} onChange={e=>patch('country_code',e.target.value||null)}><option value="">{t('register.all_countries')}</option>{tax.data?.countries.map(c=><option key={c.iso2} value={c.iso2}>{c.name}</option>)}</select></Field>
