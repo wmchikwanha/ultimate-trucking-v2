@@ -23,6 +23,7 @@ import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenti
 import { Route as AuthenticatedMatchRouteImport } from './routes/_authenticated/match'
 import { Route as AuthenticatedTelematicsRouteImport } from './routes/_authenticated/telematics'
 import { Route as AuthenticatedTrustRouteImport } from './routes/_authenticated/trust'
+import { Route as AuthenticatedAdminDocumentRegisterRouteImport } from './routes/_authenticated/admin.document-register'
 import { Route as AuthenticatedOnboardingSupplierRouteImport } from './routes/_authenticated/onboarding.supplier'
 import { Route as AuthenticatedOpsApprovalsRouteImport } from './routes/_authenticated/ops.approvals'
 
@@ -97,6 +98,12 @@ const AuthenticatedTrustRoute = AuthenticatedTrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminDocumentRegisterRoute =
+  AuthenticatedAdminDocumentRegisterRouteImport.update({
+    id: '/admin/document-register',
+    path: '/admin/document-register',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingSupplierRoute =
   AuthenticatedOnboardingSupplierRouteImport.update({
     id: '/onboarding/supplier',
@@ -124,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/match': typeof AuthenticatedMatchRoute
   '/telematics': typeof AuthenticatedTelematicsRoute
   '/trust': typeof AuthenticatedTrustRoute
+  '/admin/document-register': typeof AuthenticatedAdminDocumentRegisterRoute
   '/onboarding/supplier': typeof AuthenticatedOnboardingSupplierRoute
   '/ops/approvals': typeof AuthenticatedOpsApprovalsRoute
 }
@@ -141,6 +149,7 @@ export interface FileRoutesByTo {
   '/match': typeof AuthenticatedMatchRoute
   '/telematics': typeof AuthenticatedTelematicsRoute
   '/trust': typeof AuthenticatedTrustRoute
+  '/admin/document-register': typeof AuthenticatedAdminDocumentRegisterRoute
   '/onboarding/supplier': typeof AuthenticatedOnboardingSupplierRoute
   '/ops/approvals': typeof AuthenticatedOpsApprovalsRoute
 }
@@ -160,6 +169,7 @@ export interface FileRoutesById {
   '/_authenticated/match': typeof AuthenticatedMatchRoute
   '/_authenticated/telematics': typeof AuthenticatedTelematicsRoute
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
+  '/_authenticated/admin/document-register': typeof AuthenticatedAdminDocumentRegisterRoute
   '/_authenticated/onboarding/supplier': typeof AuthenticatedOnboardingSupplierRoute
   '/_authenticated/ops/approvals': typeof AuthenticatedOpsApprovalsRoute
 }
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/match'
     | '/telematics'
     | '/trust'
+    | '/admin/document-register'
     | '/onboarding/supplier'
     | '/ops/approvals'
   fileRoutesByTo: FileRoutesByTo
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/match'
     | '/telematics'
     | '/trust'
+    | '/admin/document-register'
     | '/onboarding/supplier'
     | '/ops/approvals'
   id:
@@ -214,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/match'
     | '/_authenticated/telematics'
     | '/_authenticated/trust'
+    | '/_authenticated/admin/document-register'
     | '/_authenticated/onboarding/supplier'
     | '/_authenticated/ops/approvals'
   fileRoutesById: FileRoutesById
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrustRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/document-register': {
+      id: '/_authenticated/admin/document-register'
+      path: '/admin/document-register'
+      fullPath: '/admin/document-register'
+      preLoaderRoute: typeof AuthenticatedAdminDocumentRegisterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding/supplier': {
       id: '/_authenticated/onboarding/supplier'
       path: '/onboarding/supplier'
@@ -353,6 +373,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMatchRoute: typeof AuthenticatedMatchRoute
   AuthenticatedTelematicsRoute: typeof AuthenticatedTelematicsRoute
   AuthenticatedTrustRoute: typeof AuthenticatedTrustRoute
+  AuthenticatedAdminDocumentRegisterRoute: typeof AuthenticatedAdminDocumentRegisterRoute
   AuthenticatedOnboardingSupplierRoute: typeof AuthenticatedOnboardingSupplierRoute
   AuthenticatedOpsApprovalsRoute: typeof AuthenticatedOpsApprovalsRoute
 }
@@ -369,6 +390,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMatchRoute: AuthenticatedMatchRoute,
   AuthenticatedTelematicsRoute: AuthenticatedTelematicsRoute,
   AuthenticatedTrustRoute: AuthenticatedTrustRoute,
+  AuthenticatedAdminDocumentRegisterRoute:
+    AuthenticatedAdminDocumentRegisterRoute,
   AuthenticatedOnboardingSupplierRoute: AuthenticatedOnboardingSupplierRoute,
   AuthenticatedOpsApprovalsRoute: AuthenticatedOpsApprovalsRoute,
 }
