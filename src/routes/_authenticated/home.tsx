@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/PageHeader";
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Home — UTS" },
       { name: "description", content: "Your UTS workspace." },
       { property: "og:title", content: "Home — UTS" },

@@ -12,6 +12,8 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 export const Route = createFileRoute("/_authenticated/match")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Find help — UTS match engine" },
       { name: "description", content: "Find the nearest certified provider for your breakdown, ranked on evidence." },
       { property: "og:title", content: "Find help — UTS match engine" },

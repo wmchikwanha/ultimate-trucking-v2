@@ -14,7 +14,8 @@ export function applicableDocuments(types: DocumentType[], overrides: TradeRequi
   return types.filter(d => !d.retired && (!d.country_code || d.country_code === country) && (
     d.applies_to.includes('ALL') || d.applies_to.some(tag => tags.includes(tag) || ['EMP', 'FOREIGN', 'WASTE'].includes(tag)) ||
     overrides.some(o => o.document_type_id === d.id && o.supplier_kind === trade)
-  )).map(d => {
+  ) && (d.code !== 'CROSS_ATA' || ['ZA','BW','NA','LS','SZ'].includes(country)) &&
+    (d.code !== 'CROSS_YELLOW_CARD' || ['ZM','ZW','CD'].includes(country))).map(d => {
     const override = overrides.find(o => o.document_type_id === d.id && o.supplier_kind === trade);
     // Unverified entries and circumstance-dependent requirements can never become unconditional gates.
     const requirement: Requirement = d.verification_status === 'unverified' ? 'optional' :

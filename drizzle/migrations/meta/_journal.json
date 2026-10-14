@@ -15,6 +15,13 @@
       "when": 1791801189757,
       "tag": "0001_country_trade_document_register",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791971323065,
+      "tag": "0002_verified_document_approval_guard",
+      "breakpoints": true
     }
   ]
 }

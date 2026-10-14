@@ -20,6 +20,7 @@
 - Module visibility/state is driven by feature_flags through PhaseModule (live component when flag on, planned preview otherwise); nav config lives in src/lib/nav.ts. Why: phases switch on without code changes.
 - Demo role sign-in runs through a server function gated by the demo_login flag. Why: quick testing that can be switched off before go-live.
 - Field-facing forms save drafts to IndexedDB and queue writes in an outbox (src/lib/offline/idb.ts) that syncs when online; server wins on conflict via suppliers.updated_at. Why: suppliers work without signal.
+- Supplier document discovery uses the database document register, cached on-device; both AI reading and human review resolve bounded extraction fields from that register with legacy fallback. Why: operations can refine country/trade documents without code changes or losing old uploads.
 - Supplier self-service rules (no self-approval, submit requirements, document expiry) are enforced by database triggers, not the UI. Why: frontend must never be able to bypass approval.
 
 ## AI

@@ -6,6 +6,8 @@ import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "UTS — Productive Asset Intelligence" },
       { name: "description", content: "Ultimate Trucking Solutions helps organisations turn fleet and operational data into productive asset intelligence." },
       { property: "og:title", content: "UTS — Productive Asset Intelligence" },

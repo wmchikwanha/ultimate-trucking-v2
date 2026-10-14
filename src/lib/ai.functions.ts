@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { extractionDefinition, CONFIDENCE_THRESHOLD, MAX_TAGS, type ExtractedFields } from "./ai/schemas";
+import { applicableDocuments } from './document-register';
 
 type Ctx = { supabase: any; userId: string };
 const EDIT_ROLES = ["admin", "approver", "ops"];
@@ -48,7 +49,6 @@ export const extractDocument = createServerFn({ method: "POST" })
       return { status: "unsupported" };
     }
     if (doc.extraction_status === "confirmed") return { status: "confirmed" };
-    if (doc.extraction_status === "processing") return { status: "processing" };
     await db.from("supplier_documents").update({ extraction_status: "processing" } as never).eq("id", doc.id);
 
     const { data: file, error: dlErr } = await ctx.supabase.storage.from("supplier-documents").download(doc.storage_path);
@@ -190,9 +190,9 @@ async function loadDossier(db: any, supplierId: string) {
     db.from("supplier_coverage").select("country_code, radius_km").eq("supplier_id", supplierId),
     db.from("supplier_equipment").select("equipment_type, quantity").eq("supplier_id", supplierId),
   ]);
-  const {data: register} = await db.from("document_types").select("code,local_name,issuer,notes,online_check_url,extraction_schema");
+  const [{data: register}, {data: requirements}] = await Promise.all([db.from("document_types").select("*"),db.from("trade_document_requirements").select("*")]);
   const enriched = (docs ?? []).map((doc:any) => ({...doc, document_type: (register ?? []).find((r:any) => r.code === doc.doc_type) ?? null}));
-  return { s, docs: enriched, caps: caps ?? [], cov: cov ?? [], eq: eq ?? [] };
+  return { s, docs: enriched, caps: caps ?? [], cov: cov ?? [], eq: eq ?? [], register:register??[], requirements:requirements??[] };
 }
 
 function norm(x: unknown) { return String(x ?? "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
@@ -215,6 +215,7 @@ function checklist(d: Awaited<ReturnType<typeof loadDossier>>) {
     { key: "Two referees with valid phone numbers", ok: refs.filter((r) => r?.name?.trim() && /^\+[1-9]\d{7,14}$/.test(r?.phone ?? "")).length >= 2 },
     { key: "Capabilities declared", ok: d.caps.some((c: any) => c.active) },
     { key: "Coverage area set", ok: d.cov.length > 0 },
+    ...applicableDocuments(d.register,d.requirements,s.country_code,s.kind).filter(r=>r.effectiveRequirement==='required').map(r=>({key:`Required: ${r.local_name}`,ok:d.docs.some((x:any)=>x.doc_type===r.code&&x.status!=='rejected'&&x.extraction_status==='confirmed')})),
   ];
   const score = Math.round((items.filter((i) => i.ok).length / items.length) * 100);
   return { items, score };
