@@ -1,6 +1,6 @@
 import {
   Home, UserPlus, ClipboardCheck, Crosshair, Truck, Smartphone, Users, ShieldCheck,
-  Banknote, BarChart3, Store, Radio, LifeBuoy, type LucideIcon,
+  Banknote, BarChart3, Store, Radio, LifeBuoy, Files, type LucideIcon,
 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -9,7 +9,7 @@ export const ALL_ROLES: AppRole[] = ["admin", "approver", "ops", "auditor", "cus
 
 export type ModuleId =
   | "home" | "onboarding" | "approvals" | "match" | "dispatch" | "driver" | "customer"
-  | "trust" | "collections" | "insights" | "marketplace" | "telematics" | "help";
+  | "trust" | "collections" | "insights" | "marketplace" | "telematics" | "help" | "document_register";
 
 export type NavItem = {
   id: ModuleId;
@@ -33,6 +33,7 @@ export const NAV: NavItem[] = [
   { id: "insights", path: "/insights", icon: BarChart3, roles: ["admin", "approver", "ops", "auditor"], flag: "phase5_analytics", phase: 5 },
   { id: "marketplace", path: "/marketplace", icon: Store, roles: ["admin", "customer", "supplier"], flag: "phase6_marketplace", phase: 6 },
   { id: "help", path: "/help", icon: LifeBuoy, roles: ALL_ROLES, flag: null, phase: null },
+  { id: "document_register", path: "/admin/document-register", icon: Files, roles: ["admin", "ops"], flag: null, phase: null },
   { id: "telematics", path: "/telematics", icon: Radio, roles: ["admin", "ops", "customer"], flag: "phase6_telematics", phase: 6 },
 ];
 
