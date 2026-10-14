@@ -14,6 +14,8 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 export const Route = createFileRoute("/_authenticated/ops/approvals")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Approval queue — UTS" },
       { name: "description", content: "Review and approve supplier applications." },
       { property: "og:title", content: "Approval queue — UTS" },

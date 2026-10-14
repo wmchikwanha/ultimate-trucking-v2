@@ -12,6 +12,8 @@ import { Logo } from "@/components/Logo";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Sign in — UTS" },
       { name: "description", content: "Sign in to the UTS operations platform." },
       { property: "og:title", content: "Sign in — UTS" },
