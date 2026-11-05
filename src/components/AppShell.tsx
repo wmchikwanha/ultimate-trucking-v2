@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useFlags, useT } from "@/lib/i18n";
 import { ALL_ROLES, navFor, type AppRole, type NavItem } from "@/lib/nav";
 import { Logo } from "./Logo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 function PhaseBadge({ item }: { item: NavItem }) {
@@ -59,7 +60,7 @@ function RoleSwitcher() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const t = useT();
-  const { viewRole, user } = useAuth();
+  const { viewRole, user, isAdmin } = useAuth();
   const signOut = useSignOut();
   const items = navFor(viewRole);
   const primary = items.slice(0, 4);
@@ -98,6 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="md:hidden"><Logo compact /></div>
           <div className="hidden text-sm text-muted-foreground md:block">Productive Asset Intelligence</div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher isAdmin={isAdmin} />
             <RoleSwitcher />
             <button onClick={signOut} aria-label={t("shell.sign_out")} className="text-primary md:hidden">
               <LogOut className="h-5 w-5" />

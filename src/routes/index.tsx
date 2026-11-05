@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Crosshair, ShieldCheck, Truck } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
@@ -28,7 +29,7 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
         <Logo />
-        <Link to="/auth" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">{t("landing.sign_in")}</Link>
+        <div className="flex items-center gap-3"><LanguageSwitcher /><Link to="/auth" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">{t("landing.sign_in")}</Link></div>
       </header>
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-8 md:pt-16">
         <h1 className="max-w-3xl text-3xl font-bold leading-tight md:text-5xl">
