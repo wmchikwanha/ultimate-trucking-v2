@@ -8,7 +8,6 @@ import { latestDecisionReason } from "@/lib/approvals.functions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTaxonomy } from "@/lib/taxonomy";
 import { STEP_KEYS, TOTAL_STEPS } from "@/lib/onboarding/model";
 import { useOnboarding } from "@/lib/onboarding/useOnboarding";
@@ -115,7 +114,7 @@ function Wizard() {
         })}
       </div>
 
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><Button variant="outline" onClick={() => {setErrors([]); w.goTo(10);}}><FileText/>{t("register.documents")} ({d.documents.length})</Button><LanguageSwitcher /></div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><Button variant="outline" onClick={() => {setErrors([]); w.goTo(10);}}><FileText/>{t("register.documents")} ({d.documents.length})</Button></div>
       <h1 className="text-2xl font-bold text-primary">{t(`wizard.step.${STEP_KEYS[step - 1]}`)}</h1>
       <p className="mb-5 mt-1 text-sm text-muted-foreground">{t(step === 2 ? "wizard.business_help" : `wizard.step.${STEP_KEYS[step - 1]}.help`)}</p>
 
